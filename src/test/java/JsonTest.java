@@ -1,18 +1,18 @@
 
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.*;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonSerializer;
 import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.internal.bind.ObjectTypeAdapter;
 import com.google.gson.reflect.TypeToken;
@@ -41,7 +41,8 @@ public class JsonTest {
     //Jackson替换fastjson 相关资料
     // https://www.cnblogs.com/larva-zhh/p/11544317.html
 
-    private static int fastJsonFeature;
+    private static int fastJsonSerFeature = JSON.DEFAULT_GENERATE_FEATURE;   //toJsonString 用的
+    private static int fastJsonDeserFeature = JSON.DEFAULT_PARSER_FEATURE;   //parseObject 用的
     public Gson gson;
     public ObjectMapper objectMapper;
 
@@ -56,14 +57,32 @@ public class JsonTest {
     }
 
     public static void initFastJson() {
-        //去掉fastjson的按字母排序的默认特性，改为按字段定义顺序 (gson 和 jackson 都是默认按字段定义顺序）
-        fastJsonFeature = JSON.DEFAULT_GENERATE_FEATURE & ~SerializerFeature.SortField.getMask();
         // map的字段按字母顺序排序
-        fastJsonFeature |= SerializerFeature.MapSortField.getMask();
+        fastJsonSerFeature |= SerializerFeature.MapSortField.getMask();
+        //关闭fastjson的按字母排序的默认特性，改为按字段定义顺序 (gson 和 jackson 都是默认按字段定义顺序）
+        fastJsonSerFeature &= ~SerializerFeature.SortField.getMask();
+
         // 非字符串的key加上引号
-        fastJsonFeature |= SerializerFeature.WriteNonStringKeyAsString.getMask();
-        //  关闭循环引用检测 （重复引用 不使用 $ref)
-        fastJsonFeature |= SerializerFeature.DisableCircularReferenceDetect.getMask();
+        fastJsonSerFeature |= SerializerFeature.WriteNonStringKeyAsString.getMask();
+        //  关闭循环引用检测 （重复引用 不使用 $ref， 但循环引用会抛异常)
+        fastJsonSerFeature |= SerializerFeature.DisableCircularReferenceDetect.getMask();
+
+
+
+        //不输出为null 的字段
+        fastJsonSerFeature &= ~SerializerFeature.WriteMapNullValue.getMask();
+
+
+        //////////////////////////////////////////////////////////////////////////////////
+//        fastJsonDeserFeature &= ~Feature.SortFeidFastMatch.getMask();
+
+        //  将json中的浮点数解析成BigDecimal对象，禁用后会解析成Double对象
+        fastJsonDeserFeature &= ~Feature.UseBigDecimal.getMask();
+
+
+
+        //序列化时忽略transient修饰的field
+//        fastJsonFeature |= SerializerFeature.SkipTransientField.getMask();
     }
 
     public static Gson initGson() {
@@ -106,8 +125,16 @@ public class JsonTest {
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         // 序列化不包含 null 值
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        //对map的key不要求包含引号
+        //对map的key不要求包含引号 (兼容fastjson设置）
         mapper.configure(com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+        // jackson默认开启遇到未知属性需要抛异常，因此如要和fastjson保持一致则需要关闭该特性
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+        mapper.configure(com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+
+        //序列化时忽略transient修饰的field (在有getter setter时才会起作用。  如果没有getter setter， 不会序列化transient字段）
+        mapper.configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true);
+
 
         SimpleModule module = new SimpleModule();
         module.addSerializer(java.sql.Time.class, new SqlTimeJacksonSerializer());
@@ -126,9 +153,10 @@ public class JsonTest {
     }
 
     public static void main(String[] args) throws JsonProcessingException {
-//        JsonTest test = new JsonTest();
+        JsonTest test = new JsonTest();
 //        test.testSerialize();
 //        test.testDeserialize();
+//        test.testDeserialize2();
 
         JUnitCore.runClasses(new Class[] {JsonTest.class });
     }
@@ -137,7 +165,7 @@ public class JsonTest {
     public void testSerialize() {
         JsonBean bean = JsonBean.getTestBean();
 
-        String fastjsonStr = JSON.toJSONString(bean, fastJsonFeature);
+        String fastjsonStr = JSON.toJSONString(bean, fastJsonSerFeature);
         String gsonStr = getGson().toJson(bean);
         String jacksonStr = "";
         try {
@@ -163,9 +191,9 @@ public class JsonTest {
     @Test
     public void testDeserialize() {
         JsonBean bean = JsonBean.getTestBean();
-        String json = JSON.toJSONString(bean, fastJsonFeature);
+        String json = JSON.toJSONString(bean, fastJsonSerFeature);
 
-        JsonBean fastjsonObj = JSON.parseObject(json, JsonBean.class, fastJsonFeature);
+        JsonBean fastjsonObj = JSON.parseObject(json, JsonBean.class, fastJsonDeserFeature);
         JsonBean gsonObj = getGson().fromJson(json, JsonBean.class);
         JsonBean jacksonObj = null;
         try {
@@ -177,16 +205,52 @@ public class JsonTest {
         System.out.println();
         System.out.println("test Deserialize:");
         System.out.println("original:" + json);
-        System.out.println("Fastjson:" + JSON.toJSONString(fastjsonObj, fastJsonFeature));
-        System.out.println("Gson:    " + JSON.toJSONString(gsonObj, fastJsonFeature));
-        System.out.println("Jackson: " + JSON.toJSONString(jacksonObj, fastJsonFeature));
+        System.out.println("Fastjson:" + JSON.toJSONString(fastjsonObj, fastJsonSerFeature));
+        System.out.println("Gson:    " + JSON.toJSONString(gsonObj, fastJsonSerFeature));
+        System.out.println("Jackson: " + JSON.toJSONString(jacksonObj, fastJsonSerFeature));
 
         System.err.println("FastjsonBean == GsonBean: \t\t" + fastjsonObj.equals(gsonObj));
         System.err.println("FastjsonBean == JacksonBean:\t" + fastjsonObj.equals(jacksonObj));
 
         assert fastjsonObj.equals(gsonObj);
         assert fastjsonObj.equals(jacksonObj);
+
+        assert ((Map)fastjsonObj.mapObject).get("double").getClass() == java.lang.Double.class;
+        assert ((Map)fastjsonObj.mapObject).get("double").getClass() == java.lang.Double.class;
+        assert ((Map)fastjsonObj.mapObject).get("double").getClass() == java.lang.Double.class;
+
+
+//        testDeserialize2();
     }
+
+//    @Test
+    public void testDeserialize2() {
+        String json = "{\"anInt\": 1, \"abInt\": 2}";
+        JsonBean fastjsonObj = JSON.parseObject(json, JsonBean.class, fastJsonDeserFeature);
+        JsonBean gsonObj = getGson().fromJson(json, JsonBean.class);
+        JsonBean jacksonObj = null;
+        try {
+            jacksonObj = getObjectMapper().readValue(json, JsonBean.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     static class CustomObjectTypeAdapter extends TypeAdapter<Object> {
         public static final TypeAdapterFactory FACTORY = new TypeAdapterFactory() {
@@ -403,6 +467,15 @@ public class JsonTest {
         public java.sql.Timestamp sqlTimestamp = new java.sql.Timestamp(date.getTime());
         public Locale.Category oneEnum = Locale.Category.DISPLAY;
 
+        public transient int testTransient = 1;
+
+        public int getTestTransient() {
+            return testTransient;
+        }
+
+        public void setTestTransient(int testTransient) {
+            this.testTransient = testTransient;
+        }
 
         public static JsonBean getTestBean() {
             JsonBean bean = new JsonBean();
@@ -425,6 +498,7 @@ public class JsonTest {
 
             ((TreeMap) bean.mapObject).put("r", 2);
             ((TreeMap) bean.mapObject).put("1", "ok");
+            ((TreeMap) bean.mapObject).put("double", 1.2);
 
             try {
                 bean.url = new URL("http://www.bing.com");
@@ -442,14 +516,14 @@ public class JsonTest {
 
         @Override
         public boolean equals(Object obj) {
-            String selfFastjsonStr = JSON.toJSONString(this, fastJsonFeature);
-            String objFastjsonStr = JSON.toJSONString(obj, fastJsonFeature);
+            String selfFastjsonStr = JSON.toJSONString(this, fastJsonSerFeature);
+            String objFastjsonStr = JSON.toJSONString(obj, fastJsonSerFeature);
             return selfFastjsonStr.equals(objFastjsonStr);
         }
 
         @Override
         public String toString() {
-            return JSON.toJSONString(this,fastJsonFeature);
+            return JSON.toJSONString(this,fastJsonSerFeature);
         }
     }
 
