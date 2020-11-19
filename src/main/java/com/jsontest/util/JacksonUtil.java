@@ -41,6 +41,9 @@ public class JacksonUtil {
         module.addDeserializer(java.sql.Time.class, new SqlTimeJacksonDeserializer());
         mapper.registerModule(module);
 
+        //禁用 AUTOTYPE   AUTO Type容易导致安全漏洞，强烈建议禁用
+        mapper.deactivateDefaultTyping();
+
         return mapper;
     }
 

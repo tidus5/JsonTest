@@ -1,3 +1,5 @@
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jsontest.bean.JsonBean;
 import com.jsontest.util.FastJsonUtil;
@@ -6,6 +8,7 @@ import com.jsontest.util.JacksonUtil;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class JsonTest {
@@ -30,7 +33,8 @@ public class JsonTest {
 //        test.testDeserialize();
 //        test.testDeserialize2();
 
-        JUnitCore.runClasses(new Class[] {JsonTest.class });
+
+//        JUnitCore.runClasses(new Class[] {JsonTest.class });
     }
 
     @Test
@@ -67,9 +71,9 @@ public class JsonTest {
         System.out.println();
         System.out.println("test Deserialize:");
         System.out.println("original:" + json);
-        System.out.println("Fastjson:" + FastJsonUtil.toJSONString(fastjsonObj));
-        System.out.println("Gson:    " + FastJsonUtil.toJSONString(gsonObj));
-        System.out.println("Jackson: " + FastJsonUtil.toJSONString(jacksonObj));
+        System.out.println("Fastjson:" + fastjsonObj);
+        System.out.println("Gson:    " + gsonObj);
+        System.out.println("Jackson: " + jacksonObj);
 
         System.err.println("FastjsonBean == GsonBean: \t\t" + fastjsonObj.equals(gsonObj));
         System.err.println("FastjsonBean == JacksonBean:\t" + fastjsonObj.equals(jacksonObj));

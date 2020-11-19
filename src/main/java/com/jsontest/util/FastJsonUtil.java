@@ -14,33 +14,37 @@ public class FastJsonUtil {
 
     static {
         initFastJson();
+
+        boolean printFeature = false;
+        if (printFeature) {
+            outputFeature();
+        }
     }
 
     public static void initFastJson() {
-        // map的字段按字母顺序排序
-        SerializeFeature |= SerializerFeature.MapSortField.getMask();
-        //关闭fastjson的按字母排序的默认特性，改为按字段定义顺序 (gson 和 jackson 都是默认按字段定义顺序）
+        //关闭 fastjson的按字母排序的默认特性。改为按字段定义顺序 (gson 和 jackson 都是默认按字段定义顺序）
         SerializeFeature &= ~SerializerFeature.SortField.getMask();
-
         // 非字符串的key加上引号
         SerializeFeature |= SerializerFeature.WriteNonStringKeyAsString.getMask();
-        //  关闭循环引用检测 （重复引用 不使用 $ref， 但循环引用会抛异常)
+        // 关闭循环引用检测 （重复引用 不使用 $ref， 但循环引用会抛异常)
         SerializeFeature |= SerializerFeature.DisableCircularReferenceDetect.getMask();
-        //不输出为null 的字段
-        SerializeFeature &= ~SerializerFeature.WriteMapNullValue.getMask();
-        //序列化时忽略transient修饰的field
-//        fastJsonFeature |= SerializerFeature.SkipTransientField.getMask();
 
 
+
+        // 反序列化特性 //
         //////////////////////////////////////////////////////////////////////////////////
 
-//        fastJsonDeserFeature &= ~Feature.SortFeidFastMatch.getMask();
-
-        //  将json中的浮点数解析成BigDecimal对象，禁用后会解析成Double对象
+        //关闭将json中的浮点数解析成BigDecimal对象的特性。禁用后会解析成Double对象
         DeserializeFeature &= ~Feature.UseBigDecimal.getMask();
+
+//         允许json字段名不被引号包括起来 (fastjson 默认开启，但jackson默认关闭）
+//        Feature.AllowUnQuotedFieldNames;
+//        允许json字段名使用单引号包括起来 (fastjson 默认开启，但jackson默认关闭）
+//        Feature.AllowSingleQuotes
+
     }
 
-    public static String toJSONString(JsonBean bean) {
+    public static String toJSONString(Object bean) {
         return JSON.toJSONString(bean, SerializeFeature);
     }
 
@@ -48,4 +52,29 @@ public class FastJsonUtil {
         return JSON.parseObject(json, clazz, DeserializeFeature);
     }
 
+    public static void outputFeature(){
+
+        for (SerializerFeature feature : SerializerFeature.values()) {
+            if (SerializerFeature.isEnabled( JSON.DEFAULT_GENERATE_FEATURE, feature)) {
+                System.out.println("Def_SerialFeature:" + feature);
+            }
+        }
+        for (SerializerFeature feature : SerializerFeature.values()) {
+            if (SerializerFeature.isEnabled(SerializeFeature, feature)) {
+                System.out.println("SerialFeature:" + feature);
+            }
+        }
+        System.out.println();
+
+        for (Feature feature : Feature.values()) {
+            if (Feature.isEnabled(JSON.DEFAULT_PARSER_FEATURE, feature)) {
+                System.out.println("Def_DeserFeature:" + feature);
+            }
+        }
+        for (Feature feature : Feature.values()) {
+            if (Feature.isEnabled(DeserializeFeature, feature)) {
+                System.out.println("DeserFeature:" + feature);
+            }
+        }
+    }
 }

@@ -3,8 +3,10 @@ package com.jsontest.bean;
 
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.jsontest.util.NetUtil;
 
 import java.math.BigDecimal;
@@ -50,9 +52,8 @@ public class JsonBean {
         public List<String> stringList = Lists.newArrayList("ffff");
         public List<Object> objectList = Lists.newArrayList(new Object(), new int[]{2, 3});
 
-        //set 序列化是无序的，这里只测试有序的
-//        public Set<Integer> integerSet = Sets.newHashSet(4, 5, 9);
-        public Map<String, Integer> stringIntegerMap = Maps.newTreeMap();
+        public Set<Integer> integerSet = Sets.newHashSet(4, 15, 9,45,1,6,88,31);
+        public Map<String, Integer> stringIntegerMap = Maps.newHashMap();
 
         public Object nullObject = null;
         public Object intObject = 1;
@@ -101,6 +102,7 @@ public class JsonBean {
             Map m = Maps.newTreeMap();
             m.put("oo", 1);
             m.put("ee", 2.3f);
+            m.put("ff", null);
             bean.objectList.add(m);
             bean.objectList.add(m); //测试重复引用
             bean.objectList.add(null);
@@ -113,7 +115,10 @@ public class JsonBean {
             bean.stringIntegerMap.put("a", 33);
             bean.stringIntegerMap.put("d", 99);
             bean.stringIntegerMap.put("b", 66);
+            bean.stringIntegerMap.put("z", 4);
             bean.stringIntegerMap.put("c", 77);
+            bean.stringIntegerMap.put("d", null);
+
 
             ((TreeMap) bean.mapObject).put("r", 2);
             ((TreeMap) bean.mapObject).put("1", "ok");
@@ -135,13 +140,19 @@ public class JsonBean {
 
         @Override
         public boolean equals(Object obj) {
-            String selfFastjsonStr = JSON.toJSONString(this, SerializeFeature);
-            String objFastjsonStr = JSON.toJSONString(obj, SerializeFeature);
-            return selfFastjsonStr.equals(objFastjsonStr);
+            if (obj == null ) {
+                return false;
+            }
+            if(obj instanceof JsonBean){
+                return obj.toString().equals(this.toString());
+            }
+            return super.equals(obj);
         }
 
         @Override
         public String toString() {
-            return JSON.toJSONString(this, SerializeFeature);
+            // map的字段按字母顺序排序。 默认是关闭的，也建议关闭，开启会影响性能。
+            // 这里用主要是为了统一输出格式
+            return JSON.toJSONString(this, SerializeFeature, SerializerFeature.MapSortField);
         }
     }
