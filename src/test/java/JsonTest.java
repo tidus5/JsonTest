@@ -85,13 +85,11 @@ public class JsonTest {
         assert ((Map)fastjsonObj.mapObject).get("double").getClass() == java.lang.Double.class;
         assert ((Map)fastjsonObj.mapObject).get("double").getClass() == java.lang.Double.class;
 
-
-//        testDeserialize2();
     }
 
-//    @Test
-    public void testDeserialize2() {
-        String json = "{\"anInt\": 1, \"abInt\": 2}";
+    @Test
+    public void testNotExistFieldDeserialize() {
+        String json = "{\"anInt\": 1, \"notExistInt\": 2}";
         JsonBean fastjsonObj = FastJsonUtil.parseObject(json, JsonBean.class);
         JsonBean gsonObj = GsonUtil.fromJson(json, JsonBean.class);
         JsonBean jacksonObj = JacksonUtil.readValue(json, JsonBean.class);

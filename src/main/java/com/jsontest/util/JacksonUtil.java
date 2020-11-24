@@ -29,9 +29,6 @@ public class JacksonUtil {
         mapper.configure(com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
         // jackson默认开启遇到未知属性需要抛异常，因此如要和fastjson保持一致则需要关闭该特性
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-
-        mapper.configure(com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-
         //序列化时忽略transient修饰的field (在有getter setter时才会起作用。  如果没有getter setter， 不会序列化transient字段）
         mapper.configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true);
 
