@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.jsontest.bean.JsonBean;
 
 import java.io.IOException;
 import java.sql.Time;
@@ -45,7 +44,7 @@ public class JacksonUtil {
     }
 
 
-    public static String writeValueAsString(JsonBean bean) {
+    public static String writeValueAsString(Object bean) {
         try {
             return getObjectMapper().writeValueAsString(bean);
         } catch (JsonProcessingException e) {

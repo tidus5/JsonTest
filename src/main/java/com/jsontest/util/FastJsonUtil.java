@@ -3,7 +3,6 @@ package com.jsontest.util;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.jsontest.bean.JsonBean;
 
 import java.lang.reflect.Type;
 
@@ -56,7 +55,7 @@ public class FastJsonUtil {
 
         for (SerializerFeature feature : SerializerFeature.values()) {
             if (SerializerFeature.isEnabled( JSON.DEFAULT_GENERATE_FEATURE, feature)) {
-                System.out.println("Def_SerialFeature:" + feature);
+                System.out.println("Default_SerialFeature:" + feature);
             }
         }
         for (SerializerFeature feature : SerializerFeature.values()) {
@@ -68,7 +67,7 @@ public class FastJsonUtil {
 
         for (Feature feature : Feature.values()) {
             if (Feature.isEnabled(JSON.DEFAULT_PARSER_FEATURE, feature)) {
-                System.out.println("Def_DeserFeature:" + feature);
+                System.out.println("Default_DeserFeature:" + feature);
             }
         }
         for (Feature feature : Feature.values()) {

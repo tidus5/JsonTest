@@ -8,7 +8,6 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
-import com.jsontest.bean.JsonBean;
 import org.apache.commons.codec.binary.Base64;
 
 import java.io.IOException;
@@ -66,7 +65,7 @@ public class GsonUtil {
         return newGson;
     }
 
-    public static String toJson(JsonBean bean) {
+    public static String toJson(Object bean) {
         return getGson().toJson(bean);
     }
 
