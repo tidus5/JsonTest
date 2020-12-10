@@ -51,11 +51,14 @@ public class JsonTest {
         System.out.println("Gson:    " + gsonStr);
         System.out.println("Jackson: " + jacksonStr);
 
+        System.err.println("jackson  == gson: \t\t" + jacksonStr.equals(gsonStr));
         System.err.println("fastjson == gson: \t\t" + fastjsonStr.equals(gsonStr));
         System.err.println("fastjson == jackson:\t" + fastjsonStr.equals(jacksonStr));
 
+        assert gsonStr.equals(jacksonStr);
         assert fastjsonStr.equals(gsonStr);
         assert fastjsonStr.equals(jacksonStr);
+
 
     }
 
@@ -63,7 +66,11 @@ public class JsonTest {
     public void testDeserialize() {
         JsonBean bean = JsonBean.getTestBean();
         String json = FastJsonUtil.toJSONString(bean);
+        testDeserialize(json);
 
+    }
+
+    public void testDeserialize(String json) {
         JsonBean gsonObj = GsonUtil.fromJson(json, JsonBean.class);
         JsonBean fastjsonObj = FastJsonUtil.parseObject(json, JsonBean.class);
         JsonBean jacksonObj = JacksonUtil.readValue(json, JsonBean.class);
@@ -78,21 +85,27 @@ public class JsonTest {
         System.err.println("FastjsonBean == GsonBean: \t\t" + fastjsonObj.equals(gsonObj));
         System.err.println("FastjsonBean == JacksonBean:\t" + fastjsonObj.equals(jacksonObj));
 
-        assert fastjsonObj.equals(gsonObj);
         assert fastjsonObj.equals(jacksonObj);
+        assert fastjsonObj.equals(gsonObj);
+        assert jacksonObj.equals(gsonObj);
 
-        assert ((Map)fastjsonObj.mapObject).get("double").getClass() == java.lang.Double.class;
-        assert ((Map)fastjsonObj.mapObject).get("double").getClass() == java.lang.Double.class;
-        assert ((Map)fastjsonObj.mapObject).get("double").getClass() == java.lang.Double.class;
+        if (fastjsonObj != null && fastjsonObj.mapObject != null
+                && ((Map) fastjsonObj.mapObject).get("double") != null) {
+            assert ((Map) fastjsonObj.mapObject).get("double").getClass() == java.lang.Double.class;
+            assert ((Map) gsonObj.mapObject).get("double").getClass() == java.lang.Double.class;
+            assert ((Map) jacksonObj.mapObject).get("double").getClass() == java.lang.Double.class;
+        }
 
     }
 
     @Test
     public void testNotExistFieldDeserialize() {
+
         String json = "{\"anInt\": 1, \"notExistInt\": 2}";
-        JsonBean fastjsonObj = FastJsonUtil.parseObject(json, JsonBean.class);
-        JsonBean gsonObj = GsonUtil.fromJson(json, JsonBean.class);
-        JsonBean jacksonObj = JacksonUtil.readValue(json, JsonBean.class);
+        testDeserialize("{\"name\":123,\"age\":345}");
+//        JsonBean fastjsonObj = FastJsonUtil.parseObject(json, JsonBean.class);
+//        JsonBean gsonObj = GsonUtil.fromJson(json, JsonBean.class);
+//        JsonBean jacksonObj = JacksonUtil.readValue(json, JsonBean.class);
 
     }
 

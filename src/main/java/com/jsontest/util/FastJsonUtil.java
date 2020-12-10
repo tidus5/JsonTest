@@ -2,6 +2,7 @@ package com.jsontest.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
+import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 
 import java.lang.reflect.Type;
@@ -21,25 +22,31 @@ public class FastJsonUtil {
     }
 
     public static void initFastJson() {
-        //关闭 fastjson的按字母排序的默认特性。改为按字段定义顺序 (gson 和 jackson 都是默认按字段定义顺序）
+        // 关闭 fastjson的按字母排序的默认特性。改为按字段定义顺序 (gson 和 jackson 都是默认按字段定义顺序）
         SerializeFeature &= ~SerializerFeature.SortField.getMask();
         // 非字符串的key加上引号
         SerializeFeature |= SerializerFeature.WriteNonStringKeyAsString.getMask();
         // 关闭循环引用检测 （重复引用 不使用 $ref， 但循环引用会抛异常)
         SerializeFeature |= SerializerFeature.DisableCircularReferenceDetect.getMask();
+        // 开启序列化时忽略没有实际属性对应的getter方法
+        SerializeFeature |= SerializerFeature.IgnoreNonFieldGetter.getMask();
+        // 序列化时忽略会抛异常的getter方法
+        SerializeFeature |= SerializerFeature.IgnoreErrorGetter.getMask();
 
 
 
-        // 反序列化特性 //
-        //////////////////////////////////////////////////////////////////////////////////
+        /*** 反序列化特性 ***/
 
         //关闭将json中的浮点数解析成BigDecimal对象的特性。禁用后会解析成Double对象
         DeserializeFeature &= ~Feature.UseBigDecimal.getMask();
-
 //         允许json字段名不被引号包括起来 (fastjson 默认开启，但jackson默认关闭）
 //        Feature.AllowUnQuotedFieldNames;
 //        允许json字段名使用单引号包括起来 (fastjson 默认开启，但jackson默认关闭）
 //        Feature.AllowSingleQuotes
+
+
+        //开启safeMode 完全关闭autoType功能，避免autoType漏洞
+        ParserConfig.getGlobalInstance().setSafeMode(true);
 
     }
 
