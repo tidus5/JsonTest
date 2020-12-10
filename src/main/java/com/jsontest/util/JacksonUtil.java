@@ -2,6 +2,7 @@ package com.jsontest.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -29,7 +30,7 @@ public class JacksonUtil {
         //关闭遇到空对象就失败的特性
         builder.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         //开启允许filed没有引号 (与fastjson保持兼容）
-        builder.configure(com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+        builder.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
         //关闭遇到未知属性抛异常(与fastjson保持兼容）
         builder.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         //开启序列化时忽略transient修饰的field (与fastjson保持兼容。在有getter setter时才会起作用。如果没有getter setter时，不会序列化transient字段）
@@ -70,14 +71,14 @@ public class JacksonUtil {
     }
 
     // jackson 对 sql.time 的序列化和反序列化
-    static class SqlTimeJacksonSerializer extends com.fasterxml.jackson.databind.JsonSerializer<java.sql.Time> {
+    static class SqlTimeJacksonSerializer extends JsonSerializer<java.sql.Time> {
         @Override
         public void serialize(java.sql.Time value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
             long ts = value.getTime();
             gen.writeNumber(ts);
         }
     }
-    static class SqlTimeJacksonDeserializer extends com.fasterxml.jackson.databind.JsonDeserializer<java.sql.Time> {
+    static class SqlTimeJacksonDeserializer extends JsonDeserializer<java.sql.Time> {
         @Override
         public Time deserialize(com.fasterxml.jackson.core.JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
             long ts = p.getLongValue();
