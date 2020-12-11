@@ -22,7 +22,6 @@ public class JacksonUtil {
 
     /**
      * https://www.cnblogs.com/larva-zhh/p/11544317.html
-     * @return
      */
     public static ObjectMapper initJackson(){
         JsonMapper.Builder builder = JsonMapper.builder();
@@ -41,8 +40,18 @@ public class JacksonUtil {
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
         SimpleModule module = new SimpleModule();
-        module.addSerializer(java.sql.Time.class, new SqlTimeJacksonSerializer());
-        module.addDeserializer(java.sql.Time.class, new SqlTimeJacksonDeserializer());
+        module.addSerializer(java.sql.Time.class, new JsonSerializer<Time>() {
+            @Override
+            public void serialize(Time value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+                gen.writeNumber(value.getTime());
+            }
+        });
+        module.addDeserializer(java.sql.Time.class, new JsonDeserializer<Time>() {
+            @Override
+            public Time deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+                return new java.sql.Time(p.getLongValue());
+            }
+        });
         mapper.registerModule(module);
 
         //jackson的PolymorphicDeserialization默认是支持Object.class、abstract classes、interfaces属性的AUTO Type，
@@ -67,23 +76,6 @@ public class JacksonUtil {
             return getObjectMapper().readValue(json, valueType);
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    // jackson 对 sql.time 的序列化和反序列化
-    static class SqlTimeJacksonSerializer extends JsonSerializer<java.sql.Time> {
-        @Override
-        public void serialize(java.sql.Time value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-            long ts = value.getTime();
-            gen.writeNumber(ts);
-        }
-    }
-    static class SqlTimeJacksonDeserializer extends JsonDeserializer<java.sql.Time> {
-        @Override
-        public Time deserialize(com.fasterxml.jackson.core.JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-            long ts = p.getLongValue();
-            java.sql.Time time = new java.sql.Time(ts);
-            return time;
         }
     }
 }

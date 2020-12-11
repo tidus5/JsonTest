@@ -39,6 +39,8 @@ public class FastJsonUtil {
 
         //关闭将json中的浮点数解析成BigDecimal对象的特性。禁用后会解析成Double对象
         DeserializeFeature &= ~Feature.UseBigDecimal.getMask();
+//        解析后属性保持原来的顺序
+//        DeserializeFeature |= Feature.OrderedField.getMask();
 //         允许json字段名不被引号包括起来 (fastjson 默认开启，但jackson默认关闭）
 //        Feature.AllowUnQuotedFieldNames;
 //        允许json字段名使用单引号包括起来 (fastjson 默认开启，但jackson默认关闭）
@@ -56,6 +58,18 @@ public class FastJsonUtil {
 
     public static <T> T parseObject(String json, Type clazz) {
         return JSON.parseObject(json, clazz, DeserializeFeature);
+    }
+
+    public static <T> T parseObject(String json, Type clazz, Feature... features) {
+        return JSON.parseObject(json, clazz, DeserializeFeature, features);
+    }
+
+    private static Object parse(String json, Feature... features) {
+        int featureValues = DeserializeFeature;
+        for (Feature feature : features) {
+            featureValues = Feature.config(featureValues, feature, true);
+        }
+        return JSON.parse(json, featureValues);
     }
 
     public static void outputFeature(){

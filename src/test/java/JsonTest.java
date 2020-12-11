@@ -1,14 +1,12 @@
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.alibaba.fastjson.parser.Feature;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jsontest.bean.JsonBean;
 import com.jsontest.util.FastJsonUtil;
 import com.jsontest.util.GsonUtil;
 import com.jsontest.util.JacksonUtil;
 import org.junit.Test;
-import org.junit.runner.JUnitCore;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class JsonTest {
@@ -102,11 +100,35 @@ public class JsonTest {
     public void testNotExistFieldDeserialize() {
 
         String json = "{\"anInt\": 1, \"notExistInt\": 2}";
+        testDeserialize(json);
         testDeserialize("{\"name\":123,\"age\":345}");
-//        JsonBean fastjsonObj = FastJsonUtil.parseObject(json, JsonBean.class);
-//        JsonBean gsonObj = GsonUtil.fromJson(json, JsonBean.class);
-//        JsonBean jacksonObj = JacksonUtil.readValue(json, JsonBean.class);
+    }
 
+    @Test
+    public void testOrderdArrayDeserialize() {
+
+        String json = "[{\"test\": 0}, {\"test\": 1}]";
+        List<Map> list = FastJsonUtil.parseObject(json, List.class, Feature.OrderedField);
+        assert (int) list.get(0).get("test") == 0;
+        assert (int) list.get(1).get("test") == 1;
+        list = GsonUtil.getGson().fromJson(json, List.class);
+        assert (int) list.get(0).get("test") == 0;
+        assert (int) list.get(1).get("test") == 1;
+        list = JacksonUtil.readValue(json, List.class);
+        assert (int) list.get(0).get("test") == 0;
+        assert (int) list.get(1).get("test") == 1;
+
+
+        json = "[{\"test\": 1}, {\"test\": 0}]";
+        list = FastJsonUtil.parseObject(json, List.class, Feature.OrderedField);
+        assert (int) list.get(0).get("test") == 1;
+        assert (int) list.get(1).get("test") == 0;
+        list = GsonUtil.getGson().fromJson(json, List.class);
+        assert (int) list.get(0).get("test") == 1;
+        assert (int) list.get(1).get("test") == 0;
+        list = JacksonUtil.readValue(json, List.class);
+        assert (int) list.get(0).get("test") == 1;
+        assert (int) list.get(1).get("test") == 0;
     }
 
 
