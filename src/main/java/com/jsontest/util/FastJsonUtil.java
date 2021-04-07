@@ -1,11 +1,13 @@
 package com.jsontest.util;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 
 import java.lang.reflect.Type;
+
 
 public class FastJsonUtil {
 
@@ -52,16 +54,45 @@ public class FastJsonUtil {
 
     }
 
+
+    /**
+     * 序列化:
+     */
     public static String toJSONString(Object bean) {
         return JSON.toJSONString(bean, SerializeFeature);
     }
 
+    /**
+     * 反序列化:
+     */
     public static <T> T parseObject(String json, Type clazz) {
         return JSON.parseObject(json, clazz, DeserializeFeature);
     }
 
+    /**
+     * 定制特性的反序列化:
+     */
     public static <T> T parseObject(String json, Type clazz, Feature... features) {
         return JSON.parseObject(json, clazz, DeserializeFeature, features);
+    }
+
+//    泛型反序列化:
+//    List<VO> list = JSON.parseObject("jsonString", new TypeReference<List<VO>>(){});
+
+//    其他主要API:
+//    public static final Object parse(String text); // 把JSON文本parse为JSONObject或者JSONArray
+//    public static final JSONObject parseObject(String text)； // 把JSON文本parse成JSONObject
+//    public static final <T> T parseObject(String text, Class<T> clazz); // 把JSON文本parse为JavaBean
+//    public static final JSONArray parseArray(String text); // 把JSON文本parse成JSONArray
+//    public static final <T> List<T> parseArray(String text, Class<T> clazz); //把JSON文本parse成JavaBean集合
+//    public static final String toJSONString(Object object); // 将JavaBean序列化为JSON文本
+//    public static final String toJSONString(Object object, boolean prettyFormat); // 将JavaBean序列化为带格式的JSON文本
+//    public static final Object toJSON(Object javaObject); //将JavaBean转换为JSONObject或者JSONArray。
+
+    /** 把JSON文本parse成JSONObject */
+    public static JSONObject parseObject(String json) {
+        int featureValues = DeserializeFeature;
+        return (JSONObject) JSON.parse(json, featureValues);
     }
 
     private static Object parse(String json, Feature... features) {
