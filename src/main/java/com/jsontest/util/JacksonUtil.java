@@ -13,15 +13,22 @@ import java.sql.Time;
 
 public class JacksonUtil {
 
-    public static ObjectMapper objectMapper = initJackson();
+    public static ObjectMapper mapper;
+    static {
+        try{
+            mapper = initJackson();
+        }catch(Exception e){
+           throw new RuntimeException(e);
+        }
+    }
 
-
-    public static ObjectMapper getObjectMapper() {
-        return objectMapper;
+    public static ObjectMapper getMapper() {
+        return mapper;
     }
 
     /**
      * https://www.cnblogs.com/larva-zhh/p/11544317.html
+     * https://mxcall.github.io/posts/%E5%B7%A5%E4%BD%9C/%E7%A8%8B%E5%BA%8F%E5%91%98/javaSE/FastJson%E8%BF%81%E7%A7%BB%E8%87%B3Jackson/
      */
     public static ObjectMapper initJackson(){
         JsonMapper.Builder builder = JsonMapper.builder();
@@ -65,7 +72,7 @@ public class JacksonUtil {
 
     public static String writeValueAsString(Object bean) {
         try {
-            return getObjectMapper().writeValueAsString(bean);
+            return getMapper().writeValueAsString(bean);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -73,9 +80,21 @@ public class JacksonUtil {
 
     public static <T> T readValue(String json, Class<T> valueType) {
         try {
-            return getObjectMapper().readValue(json, valueType);
+            return getMapper().readValue(json, valueType);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+
+    public static JsonNode getJsonNode(String jsonStr) {
+        JsonNode jsonNode = null;
+        try {
+            jsonNode = getMapper().readTree(jsonStr);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return jsonNode;
     }
 }
