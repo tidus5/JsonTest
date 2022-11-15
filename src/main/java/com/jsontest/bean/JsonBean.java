@@ -57,8 +57,8 @@ public class JsonBean {
     public List<Object> objectList = Lists.newArrayList(new Object(), new int[]{2, 3});
     public List<Object> nullList = null;
 
-    public Set<Integer> integerSet = Sets.newHashSet(4, 15, 9, 45, 1, 6, 88, 31);
-    public Map<String, Integer> stringIntegerMap = Maps.newHashMap();
+    public TreeSet<Integer> integerSet = Sets.newTreeSet();
+    public TreeMap<String, Integer> stringIntegerMap = Maps.newTreeMap();
 
     public Object nullObject = null;
     public Object intObject = 1;
@@ -129,6 +129,7 @@ public class JsonBean {
         stringIntegerMap.put("c", 77);
         stringIntegerMap.put("d", null);
 
+        integerSet.addAll(Sets.newHashSet(4, 15, 9, 45, 1, 6, 88, 31));
 
         ((TreeMap) mapObject).put("r", 2);
         ((TreeMap) mapObject).put("1", "ok");

@@ -1,6 +1,7 @@
 import com.alibaba.fastjson.parser.Feature;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jsontest.bean.JsonBean;
+import com.jsontest.bean.JsonBean2;
 import com.jsontest.util.FastJsonUtil;
 import com.jsontest.util.GsonUtil;
 import com.jsontest.util.JacksonUtil;
@@ -134,7 +135,35 @@ public class JsonTest {
 
 
 
+    @Test
+    public void testDeserialize2() {
+//        JsonBean bean = JsonBean.getTestBean();
+//        String json = FastJsonUtil.toJSONString(bean);
+        String json = "{\"integerSet\":[4,1,2,6,41,5,9,88,31,45,15],\"stringIntegerMap\":{\"b\":66,\"c\":77,\"a\":33,\"z\":4}}";
+        testDeserialize2(json);
 
+    }
+
+    public void testDeserialize2(String json) {
+        JsonBean2 gsonObj = GsonUtil.fromJson(json, JsonBean2.class);
+        JsonBean2 fastjsonObj = FastJsonUtil.parseObject(json, JsonBean2.class);
+        JsonBean2 jacksonObj = JacksonUtil.readValue(json, JsonBean2.class);
+
+        System.out.println();
+        System.out.println("test Deserialize:");
+        System.out.println("original:" + json);
+        System.out.println("Fastjson:" + fastjsonObj.toString());
+        System.out.println("Gson:    " + gsonObj.toString());
+        System.out.println("Jackson: " + jacksonObj.toString());
+
+        System.err.println("FastjsonBean == GsonBean: \t\t" + fastjsonObj.equals(gsonObj));
+        System.err.println("FastjsonBean == JacksonBean:\t" + fastjsonObj.equals(jacksonObj));
+
+        assert fastjsonObj.equals(jacksonObj);
+        assert fastjsonObj.equals(gsonObj);
+        assert jacksonObj.equals(gsonObj);
+
+    }
 
 
 
