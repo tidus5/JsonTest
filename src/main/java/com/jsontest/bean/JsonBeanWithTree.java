@@ -4,24 +4,13 @@ package com.jsontest.bean;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.jsontest.util.NetUtil;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.net.*;
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static com.jsontest.util.FastJsonUtil.SerializeFeature;
 
-public class JsonBean2 {
+public class JsonBeanWithTree {
     private static Date date = new Date();
 
 
@@ -43,14 +32,14 @@ public class JsonBean2 {
         return 0;
     }
 
-    public JsonBean2() {
+    public JsonBeanWithTree() {
 
 
 
     }
 
-    public static JsonBean2 getTestBean() {
-        JsonBean2 bean = new JsonBean2();
+    public static JsonBeanWithTree getTestBean() {
+        JsonBeanWithTree bean = new JsonBeanWithTree();
         return bean;
     }
 
@@ -59,7 +48,7 @@ public class JsonBean2 {
         if (obj == null) {
             return false;
         }
-        if (obj instanceof JsonBean2) {
+        if (obj instanceof JsonBeanWithTree) {
             return obj.toString().equals(this.toString());
         }
         return super.equals(obj);
