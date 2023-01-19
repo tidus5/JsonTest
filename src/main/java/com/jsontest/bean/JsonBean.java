@@ -4,6 +4,7 @@ package com.jsontest.bean;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -12,8 +13,6 @@ import com.jsontest.util.NetUtil;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.*;
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -21,9 +20,16 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static com.jsontest.util.FastJsonUtil.SerializeFeature;
 
-public class JsonBean {
+/**
+ *  https://github.com/alibaba/fastjson/issues/3115#issuecomment-732785538
+ *  由于序列化实现不同，这里bean在没有getter setter时，可以让fastjson 与其他输出相同
+ *
+ *  如果有父类，jackson会先取父类字段，fastjson和gson 最后取父类字段。所以序列化会不一致
+ *  而gson默认不大支持指定序列化顺序。
+ */
+public class JsonBean{
     private static Date date = new Date();
-
+    @JsonProperty(index = 1)
     public byte aByte = (byte) 33;
     public short aShort = (short) -2;
     public int anInt = -3;

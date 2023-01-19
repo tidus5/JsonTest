@@ -14,7 +14,6 @@
         <java.version>1.7</java.version>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
-
         <jackson.version>2.12.7.1</jackson.version>
     </properties>
 
@@ -41,15 +40,19 @@
 <!--        Core components may rely on any methods included in the supported JDK-->
 <!--        Minimum Java version is Java 7 for Jackson 2.7 - 2.12 of jackson-databind and most non-core components-->
 <!--        Minimum Java version is Java 8 for Jackson 2.13 and later-->
+
+<!--     JDK7 最高支持到2.12.  但2.12.7.1  有个 StringBuffer不能反序列化的bug  -->
+<!--    https://github.com/FasterXML/jackson-databind/issues/3446 -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+<!--            <version>2.12.7.1</version>-->
             <version>2.11.4</version>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>1.2.83</version>
+            <version>1.2.79</version>
         </dependency>
 
         <dependency>
@@ -88,8 +91,6 @@
             <artifactId>json-path</artifactId>
             <version>2.4.0</version>
         </dependency>
-
     </dependencies>
-
 
 </project>

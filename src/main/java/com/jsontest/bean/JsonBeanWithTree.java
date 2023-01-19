@@ -6,16 +6,19 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Maps;
 
-import java.util.*;
+import java.util.Date;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import static com.jsontest.util.FastJsonUtil.SerializeFeature;
 
-public class JsonBeanWithTree {
+public class JsonBeanWithTree extends BaseJsonBean{
     private static Date date = new Date();
 
 
     public TreeSet<Integer> integerSet = new TreeSet<>();
     public TreeMap<String, Integer> stringIntegerMap = Maps.newTreeMap();
+//    public StringBuffer sb = new StringBuffer();
 
     public transient int testTransient = 1;
 
