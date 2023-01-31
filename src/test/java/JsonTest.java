@@ -442,6 +442,9 @@ public class JsonTest {
     @Test
     public void testSimpleDeserializeSpeed() {
         SimpleJsonBean bean = new SimpleJsonBean();
+        bean.testInt = Integer.MAX_VALUE;
+        bean.testString = "ojsdsfs 无路赛   ofijo【】【】[][]";
+        bean.jacksonIgnoreField = -01;
         String json = FastJsonUtil.toJSONString(bean);
         int warmRepeat = 2000;
         int testRepeat = 10000;
