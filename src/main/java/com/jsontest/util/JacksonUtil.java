@@ -42,6 +42,8 @@ public class JacksonUtil {
         //Jackson 反序列化配置
         // 属性在json有, entity有, 但标记为ignore注解, 不抛出异常   (默认就是false)
         builder.configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false);
+        // 枚举找不到值, 不抛出异常. (默认就是false)
+        builder.configure(DeserializationFeature.FAIL_ON_NUMBERS_FOR_ENUMS, false);
         //关闭遇到未知属性抛异常(与fastjson保持兼容）
         builder.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         //关闭遇到空对象就失败的特性
