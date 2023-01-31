@@ -8,6 +8,7 @@ import com.jsontest.bean.SimpleJsonBean;
 import com.jsontest.util.FastJsonUtil;
 import com.jsontest.util.GsonUtil;
 import com.jsontest.util.JacksonUtil;
+import org.json.JSONException;
 import org.junit.Test;
 
 import java.util.List;
@@ -63,7 +64,7 @@ public class JsonTest {
 
     @Test
     public void testSerialize() {
-        JsonBean bean = JsonBean.getTestBean();
+        JsonBean bean = JsonBean.buildTestBean();
 
         String gsonStr = GsonUtil.toJson(bean);
         String fastjsonStr = FastJsonUtil.toJSONString(bean);
@@ -100,7 +101,7 @@ public class JsonTest {
 
     @Test
     public void testDeserialize() {
-        JsonBean bean = JsonBean.getTestBean();
+        JsonBean bean = JsonBean.buildTestBean();
         String json = FastJsonUtil.toJSONString(bean);
         testJsonBeanDeserialize(json);
     }
@@ -255,6 +256,214 @@ public class JsonTest {
         assert fastjsonObj.equals(jacksonObj);
         assert fastjsonObj.equals(gsonObj);
         assert jacksonObj.equals(gsonObj);
+
+    }
+
+
+    @Test
+    public void testSerializeSpeed() {
+        JsonBean bean = JsonBean.buildTestBean();
+        int warmRepeat = 200;
+        int testRepeat = 5000;
+        long warmCost = fastjsonSer(warmRepeat, bean);
+        long testCost = fastjsonSer(testRepeat, bean);
+        System.out.println("fastjson serialize cost:"+testCost);
+
+        warmCost = gsonSer(warmRepeat, bean);
+        testCost = gsonSer(testRepeat, bean);
+        System.out.println("gson serialize cost:"+testCost);
+
+        warmCost = jacksonSer(warmRepeat, bean);
+        testCost = jacksonSer(testRepeat, bean);
+        System.out.println("jackson serialize cost:"+testCost);
+
+        warmCost = jsonlibSer(warmRepeat, bean);
+        testCost = jsonlibSer(testRepeat, bean);
+        System.out.println("json-lib serialize cost:"+testCost);
+
+        warmCost = orgjsonSer(warmRepeat, bean);
+        testCost = orgjsonSer(testRepeat, bean);
+        System.out.println("org.json serialize cost:"+testCost);
+
+
+    }
+
+    private long fastjsonSer(int times, Object bean){
+        long t0 = System.currentTimeMillis();
+        for (int i = 0; i < times; i++) {
+            String json = FastJsonUtil.toJSONString(bean);
+        }
+        long t1 = System.currentTimeMillis();
+        return t1 - t0;
+    }
+
+    private long gsonSer(int times, Object bean){
+        long t0 = System.currentTimeMillis();
+        for (int i = 0; i < times; i++) {
+            String json = GsonUtil.toJson(bean);
+        }
+        long t1 = System.currentTimeMillis();
+        return t1 - t0;
+    }
+
+    private long jacksonSer(int times, Object bean){
+        long t0 = System.currentTimeMillis();
+        for (int i = 0; i < times; i++) {
+            String json = JacksonUtil.writeValueAsString(bean);
+        }
+        long t1 = System.currentTimeMillis();
+        return t1 - t0;
+    }
+
+
+    /**
+     *  net.sf.json 框架的反序列化性能问题，引起的 CPU 使用率过高
+     * https://heapdump.cn/article/3857941
+     * @return
+     */
+    private long jsonlibSer(int times, Object bean){
+        long t0 = System.currentTimeMillis();
+        for (int i = 0; i < times; i++) {
+            net.sf.json.JSONObject jsonobj = net.sf.json.JSONObject.fromObject(bean);
+            String json = jsonobj.toString();
+        }
+        long t1 = System.currentTimeMillis();
+        return t1 - t0;
+    }
+
+    /**
+     * https://qianyang-hfut.blog.csdn.net/article/details/84099339
+     */
+    private long orgjsonSer(int times, Object bean){
+        long t0 = System.currentTimeMillis();
+        for (int i = 0; i < times; i++) {
+            org.json.JSONObject jsonobj = new org.json.JSONObject(bean);
+            String json = jsonobj.toString();
+        }
+        long t1 = System.currentTimeMillis();
+        return t1 - t0;
+    }
+
+    @Test
+    public void testDeserializeSpeed() {
+        JsonBean bean = JsonBean.buildTestBean();
+        String json = FastJsonUtil.toJSONString(bean);
+        int warmRepeat = 20;
+        int testRepeat = 100;
+        long warmCost = fastjsonDeser(warmRepeat, json, JsonBean.class);
+        long testCost = fastjsonDeser(testRepeat, json, JsonBean.class);
+        System.out.println("fastjson serialize cost:"+testCost);
+
+        warmCost = gsonDeser(warmRepeat, json, JsonBean.class);
+        testCost = gsonDeser(testRepeat, json, JsonBean.class);
+        System.out.println("gson serialize cost:"+testCost);
+
+        warmCost = jacksonDeSer(warmRepeat, json, JsonBean.class);
+        testCost = jacksonDeSer(testRepeat, json, JsonBean.class);
+        System.out.println("jackson serialize cost:"+testCost);
+
+        warmCost = jsonlibDeser(warmRepeat, json, JsonBean.class);
+        testCost = jsonlibDeser(testRepeat, json, JsonBean.class);
+        System.out.println("json-lib serialize JSONObject cost:"+testCost);
+
+        warmCost = orgjsonDeser(warmRepeat, json, JsonBean.class);
+        testCost = orgjsonDeser(testRepeat, json, JsonBean.class);
+        System.out.println("org.json serialize JSONObject cost:"+testCost);
+
+
+    }
+
+
+    private long fastjsonDeser(int times, String json, Class clazz){
+        long t0 = System.currentTimeMillis();
+        if(clazz == null){
+            clazz = JsonBean.class;
+        }
+        for (int i = 0; i < times; i++) {
+            Object bean = FastJsonUtil.parseObject(json, clazz);
+        }
+        long t1 = System.currentTimeMillis();
+        return t1 - t0;
+    }
+
+    private long gsonDeser(int times, String json, Class clazz){
+        long t0 = System.currentTimeMillis();
+        if(clazz == null){
+            clazz = JsonBean.class;
+        }
+        for (int i = 0; i < times; i++) {
+            Object bean  = GsonUtil.fromJson(json, clazz);
+        }
+        long t1 = System.currentTimeMillis();
+        return t1 - t0;
+    }
+
+    private long jacksonDeSer(int times, String json, Class clazz){
+        long t0 = System.currentTimeMillis();
+        if(clazz == null){
+            clazz = JsonBean.class;
+        }
+        for (int i = 0; i < times; i++) {
+            Object bean = JacksonUtil.readValue(json, clazz);
+        }
+        long t1 = System.currentTimeMillis();
+        return t1 - t0;
+    }
+
+    private long jsonlibDeser(int times, String json, Class clazz){
+        long t0 = System.currentTimeMillis();
+        if(clazz == null){
+            clazz = JsonBean.class;
+        }
+        for (int i = 0; i < times; i++) {
+            net.sf.json.JSONObject jsonobj = net.sf.json.JSONObject.fromObject(json);
+//            Object jsonBean = net.sf.json.JSONObject.toBean(jsonobj, clazz);
+        }
+        long t1 = System.currentTimeMillis();
+        return t1 - t0;
+    }
+
+    /**
+     * 不支持 bean 级别的反序列化
+     */
+    private long orgjsonDeser(int times, String json, Class clazz){
+        long t0 = System.currentTimeMillis();
+        for (int i = 0; i < times; i++) {
+            try {
+                org.json.JSONObject jsonobj = new org.json.JSONObject(json);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        long t1 = System.currentTimeMillis();
+        return t1 - t0;
+    }
+
+    @Test
+    public void testSimpleDeserializeSpeed() {
+        SimpleJsonBean bean = new SimpleJsonBean();
+        String json = FastJsonUtil.toJSONString(bean);
+        int warmRepeat = 2000;
+        int testRepeat = 10000;
+        long warmCost = fastjsonDeser(warmRepeat,json, SimpleJsonBean.class);
+        long testCost = fastjsonDeser(testRepeat, json, SimpleJsonBean.class);
+        System.out.println("fastjson serialize cost:"+testCost);
+
+        warmCost = gsonDeser(warmRepeat, json, SimpleJsonBean.class);
+        testCost = gsonDeser(testRepeat, json, SimpleJsonBean.class);
+        System.out.println("gson serialize cost:"+testCost);
+
+        warmCost = jacksonDeSer(warmRepeat, json, SimpleJsonBean.class);
+        testCost = jacksonDeSer(testRepeat, json, SimpleJsonBean.class);
+        System.out.println("jackson serialize cost:"+testCost);
+
+        warmCost = jsonlibDeser(warmRepeat, json, SimpleJsonBean.class);
+        testCost = jsonlibDeser(testRepeat, json, SimpleJsonBean.class);
+        System.out.println("json-lib serialize JSONObject cost:"+testCost);
+
+        warmCost = orgjsonDeser(warmRepeat, json, SimpleJsonBean.class);
+        testCost = orgjsonDeser(testRepeat, json, SimpleJsonBean.class);
+        System.out.println("org.json serialize JSONObject cost:"+testCost);
 
     }
 

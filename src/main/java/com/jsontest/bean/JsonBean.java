@@ -153,7 +153,10 @@ public class JsonBean{
         }
     }
 
-    public static JsonBean getTestBean() {
+    /**
+     * 不可以用 getTeatBean。   org.json 会遍历get开头的方法，陷入死循环
+     */
+    public static JsonBean buildTestBean() {
         JsonBean bean = new JsonBean();
         return bean;
     }
