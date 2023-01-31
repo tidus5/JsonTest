@@ -59,7 +59,7 @@ public class JacksonUtilNew {
             builder.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             // int类型为null, 则抛出异常
             builder.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true);
-            // 枚举找不到值, 不抛出异常
+            // 枚举找不到值, 不抛出异常. (默认就是false)
             builder.configure(DeserializationFeature.FAIL_ON_NUMBERS_FOR_ENUMS, false);
 
 

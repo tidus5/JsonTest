@@ -177,16 +177,16 @@ public class JsonTest {
     }
 
     @Test
-    public void testNotExistFieldDeserialize() {
+    public void testSimpleBeanDeserialize() {
 
         String json = "{\"anInt\": 1, \"notExistInt\": 2, \"ttt\":233}";
         testJsonBeanDeserialize(json);
         testJsonBeanDeserialize("{\"name\":123,\"age\":345}");
 
-        testDeserialize("{\"jacksonIgnoreField\":3, \"testTransient\":34}",  SimpleJsonBean.class);
+        testDeserialize("{\"jacksonIgnoreField\":3, \"testTransient\":34,\"timeUnit\":\"sodjfosidjf\"}",  SimpleJsonBean.class);
         testDeserialize("{'testInt':34, testString:null}",  SimpleJsonBean.class);
 
-        testDeserialize("{'testInt':001, testString:null}",  SimpleJsonBean.class);
+        testDeserialize("{'testInt':001, testString:null, 'timeUnit':'MILLISECONDS'}",  SimpleJsonBean.class);
 
         // enum 用下标
         testDeserialize("{'testInt':null, 'timeUnit':2}",  SimpleJsonBean.class);
