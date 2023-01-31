@@ -16,6 +16,13 @@ import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.util.*;
 
+/**
+ * gson 对字段排除， 字段指定顺序的支持比较麻烦
+ *
+ * Google Gson用法详解：
+ * https://developer.aliyun.com/article/840439
+
+ */
 public class GsonUtil {
 
     public static Gson gson;
