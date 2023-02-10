@@ -19,6 +19,8 @@ public class JsonTest {
 
     //Jackson替换fastjson 相关资料
     // https://www.cnblogs.com/larva-zhh/p/11544317.html
+    // https://stackoverflow.com/questions/2591098/how-to-parse-json-in-java/38062714#38062714
+    // https://github.com/fabienrenaud/java-json-benchmark
 
 
     public static boolean printDetail = false;
