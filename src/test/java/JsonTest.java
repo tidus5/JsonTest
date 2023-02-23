@@ -11,6 +11,7 @@ import com.jsontest.util.JacksonUtil;
 import org.json.JSONException;
 import org.junit.Test;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -106,6 +107,21 @@ public class JsonTest {
         JsonBean bean = JsonBean.buildTestBean();
         String json = FastJsonUtil.toJSONString(bean);
         testJsonBeanDeserialize(json);
+    }
+
+
+    @Test
+    public void testGsonNumberDeserialize() {
+        Map map = new HashMap();
+        map.put("a", 3);
+
+        String str = GsonUtil.toJson(map);
+        System.out.println(str);
+
+        map = GsonUtil.fromJson(str, Map.class);
+//        System.out.println(map.get("a").getClass() +" "+map.get("a"));
+
+        assert (map.get("a").getClass() == Integer.class);
     }
 
 
